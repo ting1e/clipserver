@@ -48,7 +48,7 @@ python main.py
 - Web 历史记录地址：`http://your-server:8000`
 
 - 建议自己反代https使用
-> **用户名密码二者通用，注意自己修改**
+> **web历史记录和SyncClipboard 服务器地址（webdav）使用相同的用户名密码，注意自己修改密码**
 
 ## 构建镜像
 

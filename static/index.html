@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪贴板历史记录</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <!-- 顶部栏 -->
+        <header class="header">
+            <div class="header-left">
+                <h1>📋 剪贴板历史</h1>
+                <span class="stats">
+                    共 <span id="total-records">0</span> 条记录
+                </span>
+            </div>
+            <div class="header-right">
+                <span id="username"></span>
+                <button id="logout-btn" class="btn-link">登出</button>
+            </div>
+        </header>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button id="batch-delete-btn" class="btn"
+                    style="display:none; color:#ff4d4f; border-color:#ff4d4f;">删除选中</button>
+                <select id="type-filter" class="select">
+                    <option value="">全部类型</option>
+                    <option value="Text">文本</option>
+                    <option value="Image">图片</option>
+                    <option value="File">文件</option>
+                </select>
+                <select id="favorite-filter" class="select">
+                    <option value="">全部</option>
+                    <option value="true">仅收藏</option>
+                </select>
+                <input type="text" id="search-input" class="input" placeholder="搜索...">
+            </div>
+            <div class="toolbar-right">
+                <span class="page-info">
+                    <span id="page-range">-</span>
+                </span>
+                <button id="prev-btn" class="btn" disabled>上一页</button>
+                <button id="next-btn" class="btn" disabled>下一页</button>
+                <select id="page-size-select" class="select">
+                    <option value="20">20条/页</option>
+                    <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="10000">全部</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="table-container">
+            <table class="data-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px"><input type="checkbox" id="select-all"></th>
+                        <th class="sortable" data-field="id" style="width:60px">ID</th>
+                        <th class="sortable" data-field="type" style="width:80px">类型</th>
+                        <th>内容</th>
+                        <th style="width:100px">大小</th>
+                        <th class="sortable" data-field="created_at" style="width:160px">时间</th>
+                        <th style="width:50px">收藏</th>
+                        <th style="width:80px">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- 数据行 -->
+                </tbody>
+            </table>
+
+            <div id="loading" class="loading" style="display:none">加载中...</div>
+            <div id="empty-state" class="empty" style="display:none">暂无记录</div>
+        </div>
+
+        <!-- 图片预览 -->
+        <div id="image-modal" class="modal">
+            <div class="modal-overlay"></div>
+            <div class="modal-body">
+                <button class="modal-close">&times;</button>
+                <img id="modal-image" src="">
+            </div>
+        </div>
+
+        <!-- 文本预览 -->
+        <div id="text-modal" class="modal">
+            <div class="modal-overlay"></div>
+            <div class="text-modal-body">
+                <div class="text-modal-header">
+                    <h3>文本内容</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="text-modal-content">
+                    <pre id="text-content"></pre>
+                </div>
+                <div class="text-modal-footer">
+                    <button class="text-modal-copy">复制</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 确认对话框 -->
+        <div id="confirm-modal" class="modal">
+            <div class="modal-overlay"></div>
+            <div class="confirm-modal-body">
+                <div class="confirm-modal-header">
+                    <h3 id="confirm-title">确认</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="confirm-modal-content">
+                    <p id="confirm-message"></p>
+                </div>
+                <div class="confirm-modal-footer">
+                    <button class="btn btn-cancel" id="confirm-cancel">取消</button>
+                    <button class="btn btn-danger" id="confirm-ok">删除</button>
+                </div>
+            </div>
+        </div>
+    </div><!-- end page-wrapper -->
+
+    <script src="/js/app.js"></script>
+</body>
+
+</html>

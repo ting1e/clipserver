@@ -1,0 +1,8 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+python-dotenv==1.0.0
+WsgiDAV==4.3.0
+a2wsgi==1.10.0
+watchdog==3.0.0
+python-multipart==0.0.6

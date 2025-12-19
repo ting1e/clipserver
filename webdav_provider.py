@@ -56,7 +56,7 @@ class MonitoredFileResource(FileResource):
                 source_file = Config.FILE_DIR / filename
                 if source_file.exists():
                     # 生成唯一文件名（使用时间戳）
-                    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+                    timestamp = datetime.now(ZoneInfo(Config.TIMEZONE)).strftime("%Y%m%d_%H%M%S_%f")
                     history_filename = f"{timestamp}_{filename}"
                     dest_file = Config.HISTORY_DIR / history_filename
                     

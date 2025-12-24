@@ -277,6 +277,18 @@ body {
     border-color: #40a9ff;
 }
 
+/* 复制按钮 */
+.copy-btn {
+    font-size: 14px;
+    padding: 0 6px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.copy-btn:hover {
+    background: #e6f7ff;
+}
+
 /* 加载和空状态 */
 .loading,
 .empty {

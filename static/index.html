@@ -45,6 +45,7 @@
                 <span class="page-info">
                     <span id="page-range">-</span>
                 </span>
+                <select id="page-select" class="select" style="width:80px"></select>
                 <button id="prev-btn" class="btn" disabled>上一页</button>
                 <button id="next-btn" class="btn" disabled>下一页</button>
                 <select id="page-size-select" class="select">
@@ -65,10 +66,11 @@
                         <th class="sortable" data-field="id" style="width:60px">ID</th>
                         <th class="sortable" data-field="type" style="width:80px">类型</th>
                         <th>内容</th>
-                        <th style="width:100px">大小</th>
+                        <th style="width:100px" class="sortable" data-field="size">大小</th>
                         <th class="sortable" data-field="created_at" style="width:160px">时间</th>
-                        <th style="width:50px">收藏</th>
-                        <th style="width:80px">操作</th>
+                        <th style="width:80px ;text-align: center;">操作</th>
+                        <th style="width:80px ;text-align: center;">收藏</th>
+                        <th style="width:80px ;text-align: center;">操作</th>
                     </tr>
                 </thead>
                 <tbody id="table-body">

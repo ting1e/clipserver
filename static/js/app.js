@@ -117,6 +117,10 @@ async function loadHistory() {
                     if (state.sortField === 'created_at') {
                         va = new Date(va).getTime();
                         vb = new Date(vb).getTime();
+                    } else if (state.sortField === 'size') {
+                        // 大小排序：文本用字符数，其他用文件大小
+                        va = a.type === 'Text' ? (a.content || '').length : (a.file_size || 0);
+                        vb = b.type === 'Text' ? (b.content || '').length : (b.file_size || 0);
                     }
                     if (va < vb) return state.sortOrder === 'asc' ? -1 : 1;
                     if (va > vb) return state.sortOrder === 'asc' ? 1 : -1;
@@ -150,8 +154,9 @@ async function loadHistory() {
                     </td>
                     <td>${formatSize(item.file_size, item.type, content)}</td>
                     <td>${formatTime(item.created_at)}</td>
-                    <td><span class="favorite-btn ${favorited ? 'favorited' : ''}" data-id="${item.id}">★</span></td>
-                    <td>
+                    <td style="text-align: center;"><button class="action-btn copy-btn" data-id="${item.id}" title="复制内容">复制</button></td>
+                    <td style="text-align: center;"><span class="favorite-btn ${favorited ? 'favorited' : ''}" data-id="${item.id}">★</span></td>
+                    <td style="text-align: center;">
                         <button class="action-btn delete-btn" data-id="${item.id}" style="color:#ff4d4f;border-color:#ffccc7;">删除</button>
                     </td>
                 `;
@@ -183,6 +188,12 @@ async function loadHistory() {
                 tr.querySelector('.favorite-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     toggleFavorite(item.id, e.target);
+                });
+
+                // 复制按钮事件
+                tr.querySelector('.copy-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copyContent(item, e);
                 });
 
                 // 删除按钮事件
@@ -223,6 +234,70 @@ async function copyText(text, event) {
         showTooltip(event?.target || document.body, '已复制');
     } catch (e) {
         console.error('复制失败:', e);
+    }
+}
+
+// 复制内容（根据类型复制文本/图片/文件）
+async function copyContent(item, event) {
+    try {
+        if (item.type === 'Text') {
+            // 复制文本
+            await navigator.clipboard.writeText(item.content || '');
+            showTooltip(event?.target || document.body, '已复制');
+        } else if (item.type === 'Image' && item.file_path) {
+            // 复制图片到剪贴板（需要转换为 PNG 格式）
+            await copyImageToClipboard(item.id, event);
+        } else if (item.type === 'File' && item.file_path) {
+            // 文件类型：检查是否为图片文件，如果是则复制图片，否则下载
+            const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'];
+            const ext = (item.file_path || '').toLowerCase().split('.').pop();
+            if (imageExtensions.some(e => e.slice(1) === ext)) {
+                // 图片文件，复制图片
+                await copyImageToClipboard(item.id, event);
+            } else {
+                // 非图片文件，触发下载（浏览器不支持直接复制文件）
+                downloadFile(item.id);
+                showTooltip(event?.target || document.body, '已开始下载');
+            }
+        } else {
+            showTooltip(event?.target || document.body, '无内容');
+        }
+    } catch (e) {
+        console.error('复制失败:', e);
+        showTooltip(event?.target || document.body, '复制失败');
+    }
+}
+
+// 复制图片到剪贴板
+async function copyImageToClipboard(id, event) {
+    try {
+        // 创建一个 Image 对象加载图片
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = `/api/file/${id}`;
+        });
+
+        // 使用 Canvas 将图片转换为 PNG blob
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        // 转换为 PNG blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+        // 写入剪贴板
+        const clipboardItem = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([clipboardItem]);
+        showTooltip(event?.target || document.body, '图片已复制');
+    } catch (e) {
+        console.error('复制图片失败:', e);
+        showTooltip(event?.target || document.body, '复制图片失败');
     }
 }
 
@@ -436,6 +511,26 @@ function updatePagination() {
 
     document.getElementById('prev-btn').disabled = state.currentPage === 1;
     document.getElementById('next-btn').disabled = state.currentPage >= totalPages;
+
+    // 更新页面选择下拉框
+    const pageSelect = document.getElementById('page-select');
+    pageSelect.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `${i}/${totalPages}`;
+        if (i === state.currentPage) {
+            option.selected = true;
+        }
+        pageSelect.appendChild(option);
+    }
+    // 如果没有页面，显示空选项
+    if (totalPages === 0) {
+        const option = document.createElement('option');
+        option.value = 1;
+        option.textContent = '0/0';
+        pageSelect.appendChild(option);
+    }
 }
 
 // 更新排序指示器
@@ -519,6 +614,12 @@ function initEvents() {
     document.getElementById('page-size-select').addEventListener('change', (e) => {
         state.pageSize = parseInt(e.target.value);
         state.currentPage = 1;
+        loadHistory();
+    });
+
+    // 页面选择下拉框
+    document.getElementById('page-select').addEventListener('change', (e) => {
+        state.currentPage = parseInt(e.target.value);
         loadHistory();
     });
 
